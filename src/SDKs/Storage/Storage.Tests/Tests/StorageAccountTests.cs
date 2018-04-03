@@ -56,6 +56,7 @@ namespace Storage.Tests
                     Sku = new Sku { Name = StorageManagementTestUtilities.DefaultSkuName },
                     Kind = Kind.Storage,
                     Location = StorageManagementTestUtilities.DefaultLocation,
+                    EnableAzureFilesAadIntegration = false,
                 };
                 storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
                 StorageManagementTestUtilities.VerifyAccountProperties(account, false);
@@ -712,7 +713,8 @@ namespace Storage.Tests
                 {
                     Encryption = new Encryption()
                     {
-                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true }, File = new EncryptionService { Enabled = true } }
+                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true }, File = new EncryptionService { Enabled = true } },
+                        KeySource = "MicroSoft.Storage"
                     }
                 };
                 account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
@@ -820,6 +822,28 @@ namespace Storage.Tests
 
                 // Query usage
                 var usages = storageMgmtClient.Usage.List();
+                Assert.Equal(1, usages.Count());
+                Assert.Equal(UsageUnit.Count, usages.First().Unit);
+                Assert.NotNull(usages.First().CurrentValue);
+                Assert.Equal(250, usages.First().Limit);
+                Assert.NotNull(usages.First().Name);
+                Assert.Equal("StorageAccounts", usages.First().Name.Value);
+                Assert.Equal("Storage Accounts", usages.First().Name.LocalizedValue);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountLocationUsageTest()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Query usage
+                var usages = storageMgmtClient.Usage.ListByLocation(StorageManagementTestUtilities.DefaultLocation);
                 Assert.Equal(1, usages.Count());
                 Assert.Equal(UsageUnit.Count, usages.First().Unit);
                 Assert.NotNull(usages.First().CurrentValue);
@@ -1127,7 +1151,8 @@ namespace Storage.Tests
                 {
                     Encryption = new Encryption()
                     {
-                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true }, File = new EncryptionService { Enabled = true } }
+                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true }, File = new EncryptionService { Enabled = true } },
+                        KeySource = "MicroSoft.Storage"
                     }
                 };
                 account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
@@ -1145,27 +1170,28 @@ namespace Storage.Tests
                 Assert.Equal(true, account.Encryption.Services.File.Enabled);
                 Assert.NotNull(account.Encryption.Services.File.LastEnabledTime);
 
-                // 2. Explicitly disable file encryption service.
-                parameters.Encryption.Services.File.Enabled = false;
-                account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
-                Assert.NotNull(account.Encryption);
+                //// 2. Explicitly disable file encryption service.
+                //parameters.Encryption.Services.File.Enabled = false;
+                //account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
+                //Assert.NotNull(account.Encryption);
 
-                // Validate
-                account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
+                //// Validate
+                //account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
 
-                Assert.NotNull(account.Encryption);
-                Assert.NotNull(account.Encryption.Services.Blob);
-                Assert.Equal(true, account.Encryption.Services.Blob.Enabled);
-                Assert.NotNull(account.Encryption.Services.Blob.LastEnabledTime);
+                //Assert.NotNull(account.Encryption);
+                //Assert.NotNull(account.Encryption.Services.Blob);
+                //Assert.Equal(true, account.Encryption.Services.Blob.Enabled);
+                //Assert.NotNull(account.Encryption.Services.Blob.LastEnabledTime);
 
-                Assert.Null(account.Encryption.Services.File);
+                //Assert.Null(account.Encryption.Services.File);
 
                 // 3. Restore storage encryption
                 parameters = new StorageAccountUpdateParameters
                 {
                     Encryption = new Encryption()
                     {
-                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true }, File = new EncryptionService { Enabled = true } }
+                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true }, File = new EncryptionService { Enabled = true } },
+                        KeySource = "MicroSoft.Storage"
                     }
                 };
                 account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
@@ -1188,7 +1214,8 @@ namespace Storage.Tests
                 {
                     Encryption = new Encryption()
                     {
-                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true } }
+                        Services = new EncryptionServices { Blob = new EncryptionService { Enabled = true } },
+                        KeySource = "MicroSoft.Storage"
                     }
                 };
                 account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
@@ -1314,7 +1341,7 @@ namespace Storage.Tests
                 string keyName = TestUtilities.GenerateName("keyvaultkey");
 
                 var parameters = StorageManagementTestUtilities.GetDefaultStorageAccountParameters();
-                parameters.Identity = new Identity {};
+                parameters.Identity = new Identity { };
                 var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
 
                 StorageManagementTestUtilities.VerifyAccountProperties(account, false);
@@ -1612,13 +1639,165 @@ namespace Storage.Tests
                     EnableHttpsTrafficOnly = true
                 };
                 var account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
-                Assert.Equal(account.Kind, Kind.StorageV2);
+                Assert.Equal(Kind.StorageV2, account.Kind);
                 Assert.True(account.EnableHttpsTrafficOnly);
 
                 // Validate
                 account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
-                Assert.Equal(account.Kind, Kind.StorageV2);
+                Assert.Equal(Kind.StorageV2, account.Kind);
                 Assert.True(account.EnableHttpsTrafficOnly);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountCreateKindFileStorage()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                // Create storage account with FileStorage
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.PremiumZRS },
+                    Kind = Kind.FileStorage,
+                    Location = StorageManagementTestUtilities.DefaultLocation
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.FileStorage, account.Kind);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountCreateKindBlockBlobStorage()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                // Create storage account with FileStorage
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.PremiumZRS },
+                    Kind = Kind.BlockBlobStorage,
+                    Location = StorageManagementTestUtilities.DefaultLocation,
+                    EnableAzureFilesAadIntegration = true
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.BlockBlobStorage, account.Kind);
+                Assert.True(account.EnableAzureFilesAadIntegration);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountCreateSkuPremiumZRS()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+
+                // Create storage account with FileStorage
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.PremiumZRS },
+                    Kind = Kind.StorageV2,
+                    Location = StorageManagementTestUtilities.DefaultLocation
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.StorageV2, account.Kind);
+                Assert.Equal(SkuName.PremiumZRS, account.Sku.Name);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountCreateIsHnsEnabled()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+
+                // Create storage account with FileStorage
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.StandardLRS },
+                    Kind = Kind.StorageV2,
+                    IsHnsEnabled = true,
+                    Location = StorageManagementTestUtilities.DefaultLocation
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.StorageV2, account.Kind);
+                Assert.Equal(SkuName.StandardLRS, account.Sku.Name);
+                Assert.True(account.IsHnsEnabled);
+
+                account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.StorageV2, account.Kind);
+                Assert.Equal(SkuName.StandardLRS, account.Sku.Name);
+                Assert.True(account.IsHnsEnabled);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountCreateEnableAzureFilesAadIntegration()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                // Create storage account with FileStorage
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.StandardLRS },
+                    Kind = Kind.StorageV2,
+                    Location = StorageManagementTestUtilities.DefaultLocation,
+                    EnableAzureFilesAadIntegration = true
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.StorageV2, account.Kind);
+                Assert.Equal(SkuName.StandardLRS, account.Sku.Name);
+                Assert.True(account.EnableAzureFilesAadIntegration);
             }
         }
     }
