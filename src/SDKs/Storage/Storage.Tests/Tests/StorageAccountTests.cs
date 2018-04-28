@@ -1610,5 +1610,92 @@ namespace Storage.Tests
                 Assert.True(account.EnableHttpsTrafficOnly);
             }
         }
+
+        [Fact]
+        public void StorageAccountCreateUpdate_EnableAzureFilesAadIntegration()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                // Create storage account with EnableAzureFilesAadIntegratio
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.StandardGRS },
+                    Kind = Kind.StorageV2,
+                    Location = StorageManagementTestUtilities.DefaultLocation,
+                    EnableAzureFilesAadIntegration = true
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.StorageV2, account.Kind);
+                Assert.True(account.EnableAzureFilesAadIntegration);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
+
+                // Update storage account EnableAzureFilesAadIntegratio to false
+                var updateparameters = new StorageAccountUpdateParameters
+                {
+                    EnableAzureFilesAadIntegration = false,
+                    EnableHttpsTrafficOnly = true
+                };
+                account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, updateparameters);
+                Assert.False(account.EnableAzureFilesAadIntegration);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
+
+                // Validate
+                account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
+                Assert.False(account.EnableAzureFilesAadIntegration);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
+
+                // Update storage account EnableAzureFilesAadIntegratio to true
+                updateparameters = new StorageAccountUpdateParameters
+                {
+                    EnableAzureFilesAadIntegration = true,
+                    EnableHttpsTrafficOnly = true
+                };
+                account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, updateparameters);
+                Assert.True(account.EnableAzureFilesAadIntegration);
+
+                // Validate
+                account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
+                Assert.True(account.EnableAzureFilesAadIntegration);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountCreate_IsHnsEnabled()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                // Create storage account with EnableAzureFilesAadIntegratio
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.StandardGRS },
+                    Kind = Kind.StorageV2,
+                    Location = StorageManagementTestUtilities.DefaultLocation,
+                    IsHnsEnabled = true
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, false);
+                Assert.Equal(Kind.StorageV2, account.Kind);
+                Assert.True(account.IsHnsEnabled);               
+            }
+        }
     }
 }
