@@ -1593,6 +1593,7 @@ namespace Storage.Tests
                 var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
                 StorageManagementTestUtilities.VerifyAccountProperties(account, false);
                 Assert.Equal(Kind.StorageV2, account.Kind);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
             }
         }
 
@@ -1621,11 +1622,13 @@ namespace Storage.Tests
                 var account = storageMgmtClient.StorageAccounts.Update(rgname, accountName, parameters);
                 Assert.Equal(account.Kind, Kind.StorageV2);
                 Assert.True(account.EnableHttpsTrafficOnly);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
 
                 // Validate
                 account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
                 Assert.Equal(account.Kind, Kind.StorageV2);
                 Assert.True(account.EnableHttpsTrafficOnly);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
             }
         }
 
@@ -1716,6 +1719,41 @@ namespace Storage.Tests
 
                 //Delete not exist Management Policies will not fail
                 storageMgmtClient.StorageAccounts.DeleteManagementPolicies(rgname, accountName);
+            }
+        }
+
+        [Fact]
+        public void StorageAccountCreateGetdfs()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                // Create storage account
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = new StorageAccountCreateParameters
+                {
+                    Sku = new Sku { Name = SkuName.StandardGRS },
+                    Kind = Kind.StorageV2,
+                    IsHnsEnabled = true,
+                    Location = "centraluseuap"
+                };
+                var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                Assert.True(account.IsHnsEnabled = true);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
+                //Assert.NotNull(account.PrimaryEndpoints.Dfs);
+
+                // Validate
+                account = storageMgmtClient.StorageAccounts.GetProperties(rgname, accountName);
+                Assert.True(account.IsHnsEnabled = true);
+                Assert.NotNull(account.PrimaryEndpoints.Web);
+                //Assert.NotNull(account.PrimaryEndpoints.Dfs);
             }
         }
     }
