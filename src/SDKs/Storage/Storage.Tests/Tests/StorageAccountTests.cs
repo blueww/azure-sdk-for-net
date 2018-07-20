@@ -1739,5 +1739,44 @@ namespace Storage.Tests
                 Assert.NotNull(account.PrimaryEndpoints.Dfs);
             }
         }
+
+        [Fact]
+        public void StorageAccountFailOver()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType().FullName))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                string rgname = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                try
+                {
+                    // Create storage account
+                    string accountName = TestUtilities.GenerateName("sto");
+                    var parameters = new StorageAccountCreateParameters
+                    {
+                        Sku = new Sku { Name = SkuName.StandardRAGRS },
+                        Kind = Kind.StorageV2,
+                        Location = StorageManagementTestUtilities.DefaultLocation
+                    };
+                    var account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
+                    string primary = account.PrimaryLocation;
+                    string secondary = account.SecondaryLocation;
+
+                    // Validate
+                    storageMgmtClient.StorageAccounts.Failover(rgname, accountName);
+                    Assert.Equal(secondary, account.PrimaryLocation);
+                    Assert.Equal(primary, account.SecondaryLocation);
+                }
+                finally
+                {
+                    resourcesClient.ResourceGroups.Delete(rgname);
+                }
+            }
+        }
     }
 }
