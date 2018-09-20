@@ -639,26 +639,26 @@ namespace Storage.Tests
                     properties2.Cors.CorsRulesProperty = new List<CorsRule>();
                     properties2.Cors.CorsRulesProperty.Add(new CorsRule()
                     {
-                        AllowedHeaders = "x-ms-meta-abc,x-ms-meta-data*,x-ms-meta-target*",
+                        AllowedHeaders = { "x-ms-meta-abc", "x-ms-meta-data*", "x-ms-meta-target*" },
                         AllowedMethods = "GET,HEAD,POST,OPTIONS,MERGE,PUT",
-                        AllowedOrigins = "http://www.contoso.com,http://www.fabrikam.com",
-                        ExposedHeaders = "x-ms-meta-*",
+                        AllowedOrigins = { "http://www.contoso.com", "http://www.fabrikam.com" },
+                        ExposedHeaders = { "x-ms-meta-*" },
                         MaxAgeInSeconds = 100
                     });
                     properties2.Cors.CorsRulesProperty.Add(new CorsRule()
                     {
-                        AllowedHeaders = "*",
+                        AllowedHeaders = { "*" },
                         AllowedMethods = "GET",
-                        AllowedOrigins = "*",
-                        ExposedHeaders = "*",
+                        AllowedOrigins = { "*" },
+                        ExposedHeaders = { "*" },
                         MaxAgeInSeconds = 2
                     });
                     properties2.Cors.CorsRulesProperty.Add(new CorsRule()
                     {
-                        AllowedHeaders = "x-ms-meta-12345675754564*",
+                        AllowedHeaders = { "x-ms-meta-12345675754564*" },
                         AllowedMethods = "GET,PUT,CONNECT",
-                        AllowedOrigins = "http://www.abc23.com,https://www.fabrikam.com/*",
-                        ExposedHeaders = "x-ms-meta-abc,x-ms-meta-data*,x -ms-meta-target*",
+                        AllowedOrigins = { "http://www.abc23.com", "https://www.fabrikam.com/*" },
+                        ExposedHeaders = { "x-ms-meta-abc", "x-ms-meta-data*", "x -ms-meta-target*" },
                         MaxAgeInSeconds = 2000
                     });
 

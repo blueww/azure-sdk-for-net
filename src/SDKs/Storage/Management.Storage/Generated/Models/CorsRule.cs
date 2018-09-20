@@ -12,6 +12,8 @@ namespace Microsoft.Azure.Management.Storage.Models
 {
     using Microsoft.Rest;
     using Newtonsoft.Json;
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
 
     /// <summary>
@@ -31,21 +33,22 @@ namespace Microsoft.Azure.Management.Storage.Models
         /// Initializes a new instance of the CorsRule class.
         /// </summary>
         /// <param name="allowedOrigins">Required if CorsRule element is
-        /// present. Specify the origin domains separated by comma, which will
-        /// be allowed via CORS , or "*" to allow all domains.</param>
+        /// present. A list of origin domains that will be allowed via CORS, or
+        /// "*" to allow all domains</param>
         /// <param name="allowedMethods">Required if CorsRule element is
-        /// present. Specify the HTTP methods separated by comma, which will be
-        /// allowed to be executed by the origin.</param>
+        /// present. A list of HTTP methods that are allowed to be executed by
+        /// the origin. Possible values include: 'DELETE', 'GET', 'HEAD',
+        /// 'MERGE', 'POST', 'OPTIONS', 'PUT'</param>
         /// <param name="maxAgeInSeconds">Required if CorsRule element is
         /// present. The number of seconds that the client/browser should cache
         /// a preflight response.</param>
         /// <param name="exposedHeaders">Required if CorsRule element is
-        /// present. Specify the response headers separated by comma, which
-        /// will be exposed to CORS clients.</param>
+        /// present. A list of response headers to expose to CORS
+        /// clients.</param>
         /// <param name="allowedHeaders">Required if CorsRule element is
-        /// present. Specify the headers separated by comma, which will be
-        /// allowed to be part of the cross-origin request.</param>
-        public CorsRule(string allowedOrigins, string allowedMethods, int maxAgeInSeconds, string exposedHeaders, string allowedHeaders)
+        /// present. A list of headers allowed to be part of the cross-origin
+        /// request.</param>
+        public CorsRule(IList<string> allowedOrigins, string allowedMethods, int maxAgeInSeconds, IList<string> exposedHeaders, IList<string> allowedHeaders)
         {
             AllowedOrigins = allowedOrigins;
             AllowedMethods = allowedMethods;
@@ -61,17 +64,18 @@ namespace Microsoft.Azure.Management.Storage.Models
         partial void CustomInit();
 
         /// <summary>
-        /// Gets or sets required if CorsRule element is present. Specify the
-        /// origin domains separated by comma, which will be allowed via CORS ,
-        /// or "*" to allow all domains.
+        /// Gets or sets required if CorsRule element is present. A list of
+        /// origin domains that will be allowed via CORS, or "*" to allow all
+        /// domains
         /// </summary>
         [JsonProperty(PropertyName = "allowedOrigins")]
-        public string AllowedOrigins { get; set; }
+        public IList<string> AllowedOrigins { get; set; }
 
         /// <summary>
-        /// Gets or sets required if CorsRule element is present. Specify the
-        /// HTTP methods separated by comma, which will be allowed to be
-        /// executed by the origin.
+        /// Gets or sets required if CorsRule element is present. A list of
+        /// HTTP methods that are allowed to be executed by the origin.
+        /// Possible values include: 'DELETE', 'GET', 'HEAD', 'MERGE', 'POST',
+        /// 'OPTIONS', 'PUT'
         /// </summary>
         [JsonProperty(PropertyName = "allowedMethods")]
         public string AllowedMethods { get; set; }
@@ -84,20 +88,18 @@ namespace Microsoft.Azure.Management.Storage.Models
         public int MaxAgeInSeconds { get; set; }
 
         /// <summary>
-        /// Gets or sets required if CorsRule element is present. Specify the
-        /// response headers separated by comma, which will be exposed to CORS
-        /// clients.
+        /// Gets or sets required if CorsRule element is present. A list of
+        /// response headers to expose to CORS clients.
         /// </summary>
         [JsonProperty(PropertyName = "exposedHeaders")]
-        public string ExposedHeaders { get; set; }
+        public IList<string> ExposedHeaders { get; set; }
 
         /// <summary>
-        /// Gets or sets required if CorsRule element is present. Specify the
-        /// headers separated by comma, which will be allowed to be part of the
-        /// cross-origin request.
+        /// Gets or sets required if CorsRule element is present. A list of
+        /// headers allowed to be part of the cross-origin request.
         /// </summary>
         [JsonProperty(PropertyName = "allowedHeaders")]
-        public string AllowedHeaders { get; set; }
+        public IList<string> AllowedHeaders { get; set; }
 
         /// <summary>
         /// Validate the object.

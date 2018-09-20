@@ -810,28 +810,6 @@ namespace Storage.Tests
             }
         }
 
-        [Fact]
-        public void StorageAccountUsageTest()
-        {
-            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
-
-            using (MockContext context = MockContext.Start(this.GetType().FullName))
-            {
-                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
-                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
-
-                // Query usage
-                var usages = storageMgmtClient.Usages.List();
-                Assert.Equal(1, usages.Count());
-                Assert.Equal(UsageUnit.Count, usages.First().Unit);
-                Assert.NotNull(usages.First().CurrentValue);
-                Assert.Equal(250, usages.First().Limit);
-                Assert.NotNull(usages.First().Name);
-                Assert.Equal("StorageAccounts", usages.First().Name.Value);
-                Assert.Equal("Storage Accounts", usages.First().Name.LocalizedValue);
-            }
-        }
-
         // [Fact]
         public void StorageAccountGetOperationsTest()
         {
@@ -1681,19 +1659,19 @@ namespace Storage.Tests
 }";
                 //Set Management Policies
                 Newtonsoft.Json.Linq.JObject rule1 = Newtonsoft.Json.Linq.JObject.Parse(rules);
-                StorageAccountManagementPolicies policy = storageMgmtClient.StorageAccounts.CreateOrUpdateManagementPolicies(rgname, accountName, rule1);
+                StorageAccountManagementPolicies policy = storageMgmtClient.ManagementPolicies.CreateOrUpdate(rgname, accountName, rule1);
                 Assert.Equal(Regex.Replace(rules, @"\r\n?|\n|\t| ", ""), Regex.Replace(policy.Policy.ToString(), @"\r\n?|\n|\t| ", ""));
 
                 //Get Management Policies
-                policy = storageMgmtClient.StorageAccounts.GetManagementPolicies(rgname, accountName);
+                policy = storageMgmtClient.ManagementPolicies.Get(rgname, accountName);
                 Assert.Equal(Regex.Replace(rules, @"\r\n?|\n|\t| ", ""), Regex.Replace(policy.Policy.ToString(), @"\r\n?|\n|\t| ", ""));
 
                 //Delete Management Policies, and check policy not exist 
-                storageMgmtClient.StorageAccounts.DeleteManagementPolicies(rgname, accountName);
+                storageMgmtClient.ManagementPolicies.Delete(rgname, accountName);
                 bool dataPolicyExist = true;
                 try
                 {
-                    policy = storageMgmtClient.StorageAccounts.GetManagementPolicies(rgname, accountName);
+                    policy = storageMgmtClient.ManagementPolicies.Get(rgname, accountName);
                 }
                 catch (Microsoft.Rest.Azure.CloudException cloudException)
                 {
@@ -1703,7 +1681,7 @@ namespace Storage.Tests
                 Assert.False(dataPolicyExist);
 
                 //Delete not exist Management Policies will not fail
-                storageMgmtClient.StorageAccounts.DeleteManagementPolicies(rgname, accountName);
+                storageMgmtClient.ManagementPolicies.Delete(rgname, accountName);
             }
         }
 
