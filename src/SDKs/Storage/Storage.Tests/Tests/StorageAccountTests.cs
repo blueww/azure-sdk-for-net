@@ -1901,7 +1901,7 @@ namespace Storage.Tests
                 {
                     Sku = new Sku { Name = SkuName.StandardRAGRS },
                     Kind = Kind.StorageV2,
-                    Location = "eastus2(stage)"
+                    Location = "eastus2euap"
                 };
                 StorageAccount account = storageMgmtClient.StorageAccounts.Create(rgname, accountName, parameters);
                 Assert.Equal(SkuName.StandardRAGRS, account.Sku.Name);
@@ -1912,6 +1912,7 @@ namespace Storage.Tests
                 Assert.NotNull(account.GeoReplicationStats);
                 Assert.NotNull(account.GeoReplicationStats.Status);
                 Assert.NotNull(account.GeoReplicationStats.LastSyncTime);
+                Assert.True(account.GeoReplicationStats.CanFailover);
             }
         }
     }
