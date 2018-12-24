@@ -1,5 +1,19 @@
 ## Microsoft.Azure.Management.Storage release notes
 
+### Changes in 9.2.0-preview
+
+- Add "CanFailover" to Storage Account Expend Property GeoReplicationStats
+
+**Breaking changes**
+
+- Change StorageAccountCreateParameters.CustomDomain.UseSubDomain to StorageAccountCreateParameters.CustomDomain.UseSubDomainName
+- Change StorageAccountUpdateParameters.CustomDomain.UseSubDomain to StorageAccountUpdateParameters.CustomDomain.UseSubDomainName
+
+### Changes in 9.1.0-preview
+
+- Support trigger Storage Account Failover on RA-GRS accounts, in case of availability issues.
+- Support expand the properties of get Storage Accounts, to get Account geoReplicationStats.
+
 ### Changes in 9.0.0-preview
 
 - Upgrade to rest api version 2018-07-01 (ManagementPolicies API still use 2018-03-01-preview)
