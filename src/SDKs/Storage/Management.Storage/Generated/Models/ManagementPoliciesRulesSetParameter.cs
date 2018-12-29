@@ -13,6 +13,8 @@ namespace Microsoft.Azure.Management.Storage.Models
     using Microsoft.Rest;
     using Microsoft.Rest.Serialization;
     using Newtonsoft.Json;
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Linq;
 
     /// <summary>
@@ -36,12 +38,14 @@ namespace Microsoft.Azure.Management.Storage.Models
         /// Initializes a new instance of the
         /// ManagementPoliciesRulesSetParameter class.
         /// </summary>
-        /// <param name="policy">The Storage Account ManagementPolicies Rules,
-        /// in JSON format. See more details in:
+        /// <param name="version">The policy version expressed as x.x.</param>
+        /// <param name="rules">The Storage Account ManagementPolicies Rules.
+        /// See more details in:
         /// https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.</param>
-        public ManagementPoliciesRulesSetParameter(object policy = default(object))
+        public ManagementPoliciesRulesSetParameter(string version = default(string), IList<ManagementPolicyRule> rules = default(IList<ManagementPolicyRule>))
         {
-            Policy = policy;
+            Version = version;
+            Rules = rules;
             CustomInit();
         }
 
@@ -51,12 +55,18 @@ namespace Microsoft.Azure.Management.Storage.Models
         partial void CustomInit();
 
         /// <summary>
-        /// Gets or sets the Storage Account ManagementPolicies Rules, in JSON
-        /// format. See more details in:
+        /// Gets or sets the policy version expressed as x.x.
+        /// </summary>
+        [JsonProperty(PropertyName = "properties.version")]
+        public string Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Storage Account ManagementPolicies Rules. See more
+        /// details in:
         /// https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.
         /// </summary>
-        [JsonProperty(PropertyName = "properties.policy")]
-        public object Policy { get; set; }
+        [JsonProperty(PropertyName = "properties.rules")]
+        public IList<ManagementPolicyRule> Rules { get; set; }
 
     }
 }

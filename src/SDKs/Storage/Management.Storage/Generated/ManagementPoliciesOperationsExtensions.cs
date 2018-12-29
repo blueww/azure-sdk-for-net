@@ -13,6 +13,8 @@ namespace Microsoft.Azure.Management.Storage
     using Microsoft.Rest;
     using Microsoft.Rest.Azure;
     using Models;
+    using System.Collections;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -82,14 +84,16 @@ namespace Microsoft.Azure.Management.Storage
             /// Storage account names must be between 3 and 24 characters in length and use
             /// numbers and lower-case letters only.
             /// </param>
-            /// <param name='policy'>
-            /// The Storage Account ManagementPolicies Rules, in JSON format. See more
-            /// details in:
+            /// <param name='version'>
+            /// The policy version expressed as x.x.
+            /// </param>
+            /// <param name='rules'>
+            /// The Storage Account ManagementPolicies Rules. See more details in:
             /// https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.
             /// </param>
-            public static StorageAccountManagementPolicies CreateOrUpdate(this IManagementPoliciesOperations operations, string resourceGroupName, string accountName, object policy = default(object))
+            public static StorageAccountManagementPolicies CreateOrUpdate(this IManagementPoliciesOperations operations, string resourceGroupName, string accountName, string version = default(string), IList<ManagementPolicyRule> rules = default(IList<ManagementPolicyRule>))
             {
-                return operations.CreateOrUpdateAsync(resourceGroupName, accountName, policy).GetAwaiter().GetResult();
+                return operations.CreateOrUpdateAsync(resourceGroupName, accountName, version, rules).GetAwaiter().GetResult();
             }
 
             /// <summary>
@@ -107,17 +111,19 @@ namespace Microsoft.Azure.Management.Storage
             /// Storage account names must be between 3 and 24 characters in length and use
             /// numbers and lower-case letters only.
             /// </param>
-            /// <param name='policy'>
-            /// The Storage Account ManagementPolicies Rules, in JSON format. See more
-            /// details in:
+            /// <param name='version'>
+            /// The policy version expressed as x.x.
+            /// </param>
+            /// <param name='rules'>
+            /// The Storage Account ManagementPolicies Rules. See more details in:
             /// https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.
             /// </param>
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<StorageAccountManagementPolicies> CreateOrUpdateAsync(this IManagementPoliciesOperations operations, string resourceGroupName, string accountName, object policy = default(object), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<StorageAccountManagementPolicies> CreateOrUpdateAsync(this IManagementPoliciesOperations operations, string resourceGroupName, string accountName, string version = default(string), IList<ManagementPolicyRule> rules = default(IList<ManagementPolicyRule>), CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.CreateOrUpdateWithHttpMessagesAsync(resourceGroupName, accountName, policy, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.CreateOrUpdateWithHttpMessagesAsync(resourceGroupName, accountName, version, rules, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }

@@ -65,9 +65,11 @@ namespace Microsoft.Azure.Management.Storage
         /// group. Storage account names must be between 3 and 24 characters in
         /// length and use numbers and lower-case letters only.
         /// </param>
-        /// <param name='policy'>
-        /// The Storage Account ManagementPolicies Rules, in JSON format. See
-        /// more details in:
+        /// <param name='version'>
+        /// The policy version expressed as x.x.
+        /// </param>
+        /// <param name='rules'>
+        /// The Storage Account ManagementPolicies Rules. See more details in:
         /// https://docs.microsoft.com/en-us/azure/storage/common/storage-lifecycle-managment-concepts.
         /// </param>
         /// <param name='customHeaders'>
@@ -85,7 +87,7 @@ namespace Microsoft.Azure.Management.Storage
         /// <exception cref="Microsoft.Rest.ValidationException">
         /// Thrown when a required parameter is null
         /// </exception>
-        Task<AzureOperationResponse<StorageAccountManagementPolicies>> CreateOrUpdateWithHttpMessagesAsync(string resourceGroupName, string accountName, object policy = default(object), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AzureOperationResponse<StorageAccountManagementPolicies>> CreateOrUpdateWithHttpMessagesAsync(string resourceGroupName, string accountName, string version = default(string), IList<ManagementPolicyRule> rules = default(IList<ManagementPolicyRule>), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
         /// <summary>
         /// Deletes the data policy rules associated with the specified storage
         /// account.
