@@ -82,6 +82,13 @@ namespace Microsoft.Azure.Management.Storage
         /// Every dash (-) character must be immediately preceded and followed
         /// by a letter or number.
         /// </param>
+        /// <param name='defaultEncryptionScope'>
+        /// Default the container to use specified encryption scope for all
+        /// writes.
+        /// </param>
+        /// <param name='denyEncryptionScopeOverride'>
+        /// Block override of encryption scope from the container default.
+        /// </param>
         /// <param name='publicAccess'>
         /// Specifies whether data in the container may be accessed publicly
         /// and the level of access. Possible values include: 'Container',
@@ -105,7 +112,7 @@ namespace Microsoft.Azure.Management.Storage
         /// <exception cref="Microsoft.Rest.ValidationException">
         /// Thrown when a required parameter is null
         /// </exception>
-        Task<AzureOperationResponse<BlobContainer>> CreateWithHttpMessagesAsync(string resourceGroupName, string accountName, string containerName, PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AzureOperationResponse<BlobContainer>> CreateWithHttpMessagesAsync(string resourceGroupName, string accountName, string containerName, string defaultEncryptionScope = default(string), bool? denyEncryptionScopeOverride = default(bool?), PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
         /// <summary>
         /// Updates container properties as specified in request body.
         /// Properties not mentioned in the request will be unchanged. Update
@@ -127,6 +134,13 @@ namespace Microsoft.Azure.Management.Storage
         /// Every dash (-) character must be immediately preceded and followed
         /// by a letter or number.
         /// </param>
+        /// <param name='defaultEncryptionScope'>
+        /// Default the container to use specified encryption scope for all
+        /// writes.
+        /// </param>
+        /// <param name='denyEncryptionScopeOverride'>
+        /// Block override of encryption scope from the container default.
+        /// </param>
         /// <param name='publicAccess'>
         /// Specifies whether data in the container may be accessed publicly
         /// and the level of access. Possible values include: 'Container',
@@ -150,7 +164,7 @@ namespace Microsoft.Azure.Management.Storage
         /// <exception cref="Microsoft.Rest.ValidationException">
         /// Thrown when a required parameter is null
         /// </exception>
-        Task<AzureOperationResponse<BlobContainer>> UpdateWithHttpMessagesAsync(string resourceGroupName, string accountName, string containerName, PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AzureOperationResponse<BlobContainer>> UpdateWithHttpMessagesAsync(string resourceGroupName, string accountName, string containerName, string defaultEncryptionScope = default(string), bool? denyEncryptionScopeOverride = default(bool?), PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken));
         /// <summary>
         /// Gets properties of a specified container.
         /// </summary>

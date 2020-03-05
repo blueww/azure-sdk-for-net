@@ -114,7 +114,7 @@ namespace Storage.Tests
                     blobContainer.Metadata = new Dictionary<string, string>();
                     blobContainer.Metadata.Add("metadata", "true");
                     blobContainer.PublicAccess = PublicAccess.Container;
-                    var blobContainerSet = storageMgmtClient.BlobContainers.Update(rgName, accountName, containerName, metadata:blobContainer.Metadata, publicAccess:blobContainer.PublicAccess);
+                    var blobContainerSet = storageMgmtClient.BlobContainers.Update(rgName, accountName, containerName, metadata: blobContainer.Metadata, publicAccess: blobContainer.PublicAccess);
                     Assert.NotNull(blobContainerSet.Metadata);
                     Assert.Equal(PublicAccess.Container, blobContainerSet.PublicAccess);
                     Assert.Equal(blobContainer.Metadata, blobContainerSet.Metadata);
@@ -124,7 +124,7 @@ namespace Storage.Tests
 
                     var storageAccount = new CloudStorageAccount(new StorageCredentials(accountName, storageMgmtClient.StorageAccounts.ListKeys(rgName, accountName).Keys.ElementAt(0).Value), false);
                     var container = storageAccount.CreateCloudBlobClient().GetContainerReference(containerName);
-                  //  container.AcquireLeaseAsync(TimeSpan.FromSeconds(45)).Wait();
+                    //  container.AcquireLeaseAsync(TimeSpan.FromSeconds(45)).Wait();
 
                     var blobContainerGet = storageMgmtClient.BlobContainers.Get(rgName, accountName, containerName);
                     //Assert.Equal(Microsoft.Azure.Management.Storage.Models.LeaseDuration.Fixed, blobContainerGet.LeaseDuration);
@@ -132,6 +132,56 @@ namespace Storage.Tests
                     Assert.Equal(blobContainerSet.Metadata, blobContainerGet.Metadata);
                     Assert.False(blobContainerGet.HasImmutabilityPolicy);
                     Assert.False(blobContainerGet.HasLegalHold);
+                }
+                finally
+                {
+                    // clean up
+                    storageMgmtClient.StorageAccounts.Delete(rgName, accountName);
+                    resourcesClient.ResourceGroups.Delete(rgName);
+                }
+            }
+        }
+
+        // create/update container with EncryptionScope
+        [Fact]
+        public void BlobContainersEncryptionScopeTest()
+        {
+            var handler = new RecordedDelegatingHandler { StatusCodeToReturn = HttpStatusCode.OK };
+
+            using (MockContext context = MockContext.Start(this.GetType()))
+            {
+                var resourcesClient = StorageManagementTestUtilities.GetResourceManagementClient(context, handler);
+                var storageMgmtClient = StorageManagementTestUtilities.GetStorageManagementClient(context, handler);
+
+                // Create resource group
+                var rgName = StorageManagementTestUtilities.CreateResourceGroup(resourcesClient);
+
+                // Create storage account
+                string accountName = TestUtilities.GenerateName("sto");
+                var parameters = StorageManagementTestUtilities.GetDefaultStorageAccountParameters();
+                var account = storageMgmtClient.StorageAccounts.Create(rgName, accountName, parameters);
+                StorageManagementTestUtilities.VerifyAccountProperties(account, true);
+
+                // implement case
+                try
+                {
+                    //Create EcryptionScope
+                    string scopeName1 = "testscope1";
+                    EncryptionScope es1 = storageMgmtClient.EncryptionScopes.Put(rgName, accountName, scopeName1, new EncryptionScope(name: scopeName1, source: EncryptionScopeSource.MicrosoftStorage, state: EncryptionScopeState.Disabled));
+
+                    string scopeName2 = "testscope2";
+                    EncryptionScope es2 = storageMgmtClient.EncryptionScopes.Put(rgName, accountName, scopeName2, new EncryptionScope(name: scopeName2, source: EncryptionScopeSource.MicrosoftStorage, state: EncryptionScopeState.Disabled));
+
+
+                    //Create container
+                    string containerName = TestUtilities.GenerateName("container");
+                    BlobContainer blobContainer = storageMgmtClient.BlobContainers.Create(rgName, accountName, containerName, scopeName1 , false);
+                    Assert.Equal(scopeName1, blobContainer.DefaultEncryptionScope);
+                    Assert.False(blobContainer.DenyEncryptionScopeOverride.Value);
+
+                    BlobContainer blobContainer2 = storageMgmtClient.BlobContainers.Update(rgName, accountName, containerName, scopeName2, true);
+                    Assert.Equal(scopeName2, blobContainer2.DefaultEncryptionScope);
+                    Assert.True(blobContainer2.DenyEncryptionScopeOverride.Value);
                 }
                 finally
                 {

@@ -111,6 +111,12 @@ namespace Microsoft.Azure.Management.Storage
             /// numbers, lower-case letters and dash (-) only. Every dash (-) character
             /// must be immediately preceded and followed by a letter or number.
             /// </param>
+            /// <param name='defaultEncryptionScope'>
+            /// Default the container to use specified encryption scope for all writes.
+            /// </param>
+            /// <param name='denyEncryptionScopeOverride'>
+            /// Block override of encryption scope from the container default.
+            /// </param>
             /// <param name='publicAccess'>
             /// Specifies whether data in the container may be accessed publicly and the
             /// level of access. Possible values include: 'Container', 'Blob', 'None'
@@ -118,9 +124,9 @@ namespace Microsoft.Azure.Management.Storage
             /// <param name='metadata'>
             /// A name-value pair to associate with the container as metadata.
             /// </param>
-            public static BlobContainer Create(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>))
+            public static BlobContainer Create(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, string defaultEncryptionScope = default(string), bool? denyEncryptionScopeOverride = default(bool?), PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>))
             {
-                return operations.CreateAsync(resourceGroupName, accountName, containerName, publicAccess, metadata).GetAwaiter().GetResult();
+                return operations.CreateAsync(resourceGroupName, accountName, containerName, defaultEncryptionScope, denyEncryptionScopeOverride, publicAccess, metadata).GetAwaiter().GetResult();
             }
 
             /// <summary>
@@ -147,6 +153,12 @@ namespace Microsoft.Azure.Management.Storage
             /// numbers, lower-case letters and dash (-) only. Every dash (-) character
             /// must be immediately preceded and followed by a letter or number.
             /// </param>
+            /// <param name='defaultEncryptionScope'>
+            /// Default the container to use specified encryption scope for all writes.
+            /// </param>
+            /// <param name='denyEncryptionScopeOverride'>
+            /// Block override of encryption scope from the container default.
+            /// </param>
             /// <param name='publicAccess'>
             /// Specifies whether data in the container may be accessed publicly and the
             /// level of access. Possible values include: 'Container', 'Blob', 'None'
@@ -157,9 +169,9 @@ namespace Microsoft.Azure.Management.Storage
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<BlobContainer> CreateAsync(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<BlobContainer> CreateAsync(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, string defaultEncryptionScope = default(string), bool? denyEncryptionScopeOverride = default(bool?), PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.CreateWithHttpMessagesAsync(resourceGroupName, accountName, containerName, publicAccess, metadata, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.CreateWithHttpMessagesAsync(resourceGroupName, accountName, containerName, defaultEncryptionScope, denyEncryptionScopeOverride, publicAccess, metadata, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
@@ -188,6 +200,12 @@ namespace Microsoft.Azure.Management.Storage
             /// numbers, lower-case letters and dash (-) only. Every dash (-) character
             /// must be immediately preceded and followed by a letter or number.
             /// </param>
+            /// <param name='defaultEncryptionScope'>
+            /// Default the container to use specified encryption scope for all writes.
+            /// </param>
+            /// <param name='denyEncryptionScopeOverride'>
+            /// Block override of encryption scope from the container default.
+            /// </param>
             /// <param name='publicAccess'>
             /// Specifies whether data in the container may be accessed publicly and the
             /// level of access. Possible values include: 'Container', 'Blob', 'None'
@@ -195,9 +213,9 @@ namespace Microsoft.Azure.Management.Storage
             /// <param name='metadata'>
             /// A name-value pair to associate with the container as metadata.
             /// </param>
-            public static BlobContainer Update(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>))
+            public static BlobContainer Update(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, string defaultEncryptionScope = default(string), bool? denyEncryptionScopeOverride = default(bool?), PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>))
             {
-                return operations.UpdateAsync(resourceGroupName, accountName, containerName, publicAccess, metadata).GetAwaiter().GetResult();
+                return operations.UpdateAsync(resourceGroupName, accountName, containerName, defaultEncryptionScope, denyEncryptionScopeOverride, publicAccess, metadata).GetAwaiter().GetResult();
             }
 
             /// <summary>
@@ -223,6 +241,12 @@ namespace Microsoft.Azure.Management.Storage
             /// numbers, lower-case letters and dash (-) only. Every dash (-) character
             /// must be immediately preceded and followed by a letter or number.
             /// </param>
+            /// <param name='defaultEncryptionScope'>
+            /// Default the container to use specified encryption scope for all writes.
+            /// </param>
+            /// <param name='denyEncryptionScopeOverride'>
+            /// Block override of encryption scope from the container default.
+            /// </param>
             /// <param name='publicAccess'>
             /// Specifies whether data in the container may be accessed publicly and the
             /// level of access. Possible values include: 'Container', 'Blob', 'None'
@@ -233,9 +257,9 @@ namespace Microsoft.Azure.Management.Storage
             /// <param name='cancellationToken'>
             /// The cancellation token.
             /// </param>
-            public static async Task<BlobContainer> UpdateAsync(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), CancellationToken cancellationToken = default(CancellationToken))
+            public static async Task<BlobContainer> UpdateAsync(this IBlobContainersOperations operations, string resourceGroupName, string accountName, string containerName, string defaultEncryptionScope = default(string), bool? denyEncryptionScopeOverride = default(bool?), PublicAccess? publicAccess = default(PublicAccess?), IDictionary<string, string> metadata = default(IDictionary<string, string>), CancellationToken cancellationToken = default(CancellationToken))
             {
-                using (var _result = await operations.UpdateWithHttpMessagesAsync(resourceGroupName, accountName, containerName, publicAccess, metadata, null, cancellationToken).ConfigureAwait(false))
+                using (var _result = await operations.UpdateWithHttpMessagesAsync(resourceGroupName, accountName, containerName, defaultEncryptionScope, denyEncryptionScopeOverride, publicAccess, metadata, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }
