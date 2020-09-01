@@ -217,7 +217,8 @@ namespace Storage.Tests
                         MaxAgeInSeconds = 2000
                     });
 
-                    FileServiceProperties properties3 = storageMgmtClient.FileServices.SetServiceProperties(rgName, accountName, cors);
+                    properties1.Cors = cors;
+                    FileServiceProperties properties3 = storageMgmtClient.FileServices.SetServiceProperties(rgName, accountName, properties1);
 
                     //Validate CORS Rules
                     Assert.Equal(cors.CorsRulesProperty.Count, properties3.Cors.CorsRulesProperty.Count);
@@ -291,7 +292,7 @@ namespace Storage.Tests
                     properties.ShareDeleteRetentionPolicy = new DeleteRetentionPolicy();
                     properties.ShareDeleteRetentionPolicy.Enabled = true;
                     properties.ShareDeleteRetentionPolicy.Days = 5;
-                    properties = storageMgmtClient.FileServices.SetServiceProperties(rgName, accountName, shareDeleteRetentionPolicy: properties.ShareDeleteRetentionPolicy);
+                    properties = storageMgmtClient.FileServices.SetServiceProperties(rgName, accountName, properties);
                     Assert.True(properties.ShareDeleteRetentionPolicy.Enabled);
                     Assert.Equal(5, properties.ShareDeleteRetentionPolicy.Days);
 
