@@ -237,7 +237,10 @@ namespace Storage.Tests
                 try
                 {
                     string containerName1 = TestUtilities.GenerateName("container");
-                    BlobContainer blobContainer = storageMgmtClient.BlobContainers.Create(rgName, accountName, containerName1, new BlobContainer());
+                    BlobContainer blobContainer = storageMgmtClient.BlobContainers.Create(rgName, accountName, containerName1, new BlobContainer(enabled: true));
+
+                    //Task t = storageMgmtClient.BlobContainers.VersionLevelWormMethodAsync(rgName, accountName, containerName1);
+                    //t.Wait();
                     Assert.Null(blobContainer.Metadata);
                     Assert.Null(blobContainer.PublicAccess);
 
