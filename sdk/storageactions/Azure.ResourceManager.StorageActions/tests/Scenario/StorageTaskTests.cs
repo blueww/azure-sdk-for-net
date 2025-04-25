@@ -29,7 +29,7 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
         private StorageTaskOperationInfo _setBlobLegalHoldOp;
 
         public StorageTaskTests(bool isAsync)
-            : base(isAsync) //, RecordedTestMode.Record)
+            : base(isAsync)//, RecordedTestMode.Record)
         {
         }
 
@@ -58,7 +58,7 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
             string storageTaskName = Recording.GenerateAssetName("sdktest");
 
             StorageTaskData taskData = new StorageTaskData(
-                new AzureLocation("eastus2euap"),
+                new AzureLocation("centraluseuap"),
                 new ManagedServiceIdentity("SystemAssigned"),
                 new StorageTaskProperties(
                     true,
@@ -72,7 +72,7 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
             StorageTaskResource storageTask = (await _taskCollection.CreateOrUpdateAsync(WaitUntil.Completed, storageTaskName, taskData)).Value;
             CompareStorageTaskData(taskData, storageTask.Data);
 
-            storageTask = (await storageTask.GetAsync()).Value;
+            storageTask = (await _taskCollection.GetAsync(storageTaskName)).Value;
             CompareStorageTaskData(taskData, storageTask.Data);
 
             // Prepare task data to Patch
@@ -100,15 +100,17 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
             CompareStorageTaskPatch(storageTask.Data, taskPatch);
 
             // Delete
+            var operation = await storageTask.DeleteAsync(WaitUntil.Completed);
+            bool taskFound = true;
             try
             {
-                var operation = await storageTask.DeleteAsync(WaitUntil.Completed);
                 storageTask = (await storageTask.GetAsync()).Value;
             }
-            catch (Exception ex)
+            catch (RequestFailedException e) when (e.Status == 404)
             {
-                ex.ToString();
+                taskFound = false;
             }
+            Assert.IsFalse(taskFound);
         }
 
         [Test]
@@ -120,7 +122,7 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
 
             // Create task1
             StorageTaskData taskData1 = new StorageTaskData(
-                new AzureLocation("eastus2euap"),
+                new AzureLocation("centraluseuap"),
                 new ManagedServiceIdentity("SystemAssigned"),
                 new StorageTaskProperties(
                     true,
@@ -129,12 +131,13 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
                         new StorageTaskIfCondition("[[equals(AccessTier, 'Cool')]]", new StorageTaskOperationInfo[] { _undeleteBlobOp, _setBlobTagsOp }),
                         null,
                         null)));
+
             StorageTaskResource storageTask1 = (await _taskCollection.CreateOrUpdateAsync(WaitUntil.Completed, storageTaskName1, taskData1)).Value;
             CompareStorageTaskData(taskData1, storageTask1.Data);
 
             // Create task2
             StorageTaskData taskData2 = new StorageTaskData(
-                new AzureLocation("eastus2euap"),
+                new AzureLocation("centraluseuap"),
                 new ManagedServiceIdentity("SystemAssigned"),
                 new StorageTaskProperties(
                     true,
@@ -162,7 +165,7 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
             string storageTaskName = Recording.GenerateAssetName("sdktest");
 
             StorageTaskData taskData = new StorageTaskData(
-                new AzureLocation("eastus2euap"),
+                new AzureLocation("centraluseuap"),
                 new ManagedServiceIdentity("SystemAssigned"),
                 new StorageTaskProperties(
                     true,
@@ -254,7 +257,7 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
             string storageTaskName = Recording.GenerateAssetName("sdktest");
 
             StorageTaskData taskData = new StorageTaskData(
-                new AzureLocation("eastus2euap"),
+                new AzureLocation("centraluseuap"),
                 new ManagedServiceIdentity("SystemAssigned"),
                 new StorageTaskProperties(
                     true,
@@ -284,7 +287,7 @@ namespace Azure.ResourceManager.StorageActions.Tests.Scenario
             string storageTaskName = Recording.GenerateAssetName("sdktest");
 
             StorageTaskData taskData = new StorageTaskData(
-                new AzureLocation("eastus2euap"),
+                new AzureLocation("centraluseuap"),
                 new ManagedServiceIdentity("SystemAssigned"),
                 new StorageTaskProperties(
                     true,
