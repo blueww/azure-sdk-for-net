@@ -20,7 +20,7 @@ namespace Azure.ResourceManager.Storage.Tests
         private StorageAccountResource _storageAccount;
         private StorageTaskAssignmentCollection _storageTaskAssignmentCollection;
         private ResourceIdentifier _storageTaskId;
-        public StorageTaskAssignmentTests(bool async) : base(async) //, RecordedTestMode.Record)
+        public StorageTaskAssignmentTests(bool async) : base(async) //,RecordedTestMode.Record)
         {
         }
 
@@ -58,7 +58,7 @@ namespace Azure.ResourceManager.Storage.Tests
             string storageTaskName = Recording.GenerateAssetName("testtask");
             ResourceIdentifier storageTaskId = new ResourceIdentifier($"{_resourceGroup.Id}/providers/Microsoft.StorageActions/storageTasks/{storageTaskName}");
 
-            var input = new GenericResourceData("eastus2euap")
+            var input = new GenericResourceData("centraluseuap")
             {
                 Identity = new ManagedServiceIdentity(ManagedServiceIdentityType.None),
                 Properties = BinaryData.FromString("{\r\n    \"action\": {\r\n      \"if\": {\r\n        \"condition\": \"[[equals(AccessTier, 'Cool')]]\",\r\n        \"operations\": [\r\n          {\r\n            \"name\": \"DeleteBlob\",\r\n            \"onSuccess\": \"continue\",\r\n            \"onFailure\": \"break\"\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    \"enabled\": true,\r\n    \"description\": \"test description\"\r\n  }")
@@ -72,7 +72,7 @@ namespace Azure.ResourceManager.Storage.Tests
         public async Task CreateUpdateGetDeleteTaskAssignement()
         {
             //create TaskAssignement
-            string taskAssignementName = Recording.GenerateAssetName("taskAssignement1");
+            string taskAssignementName = Recording.GenerateAssetName("taskassignement1");
             StorageTaskAssignmentProperties assignmentProperties = new StorageTaskAssignmentProperties(
                 _storageTaskId,
                 false,
@@ -85,10 +85,10 @@ namespace Azure.ResourceManager.Storage.Tests
                     new ExecutionTrigger(
                         ExecutionTriggerType.OnSchedule,
                         new ExecutionTriggerParameters(
-                            new DateTimeOffset(2024, 7, 1, 1, 1, 1, new TimeSpan()),
+                            new DateTimeOffset(2025, 7, 1, 1, 1, 1, new TimeSpan()), // Record: the time should be in future
                             10,
                             ExecutionIntervalUnit.Days,
-                            new DateTimeOffset(2024, 8, 1, 1, 1, 1, new TimeSpan()),
+                            new DateTimeOffset(2025, 8, 1, 1, 1, 1, new TimeSpan()), // Record: The time should be later than StartFrom
                             null,
                             null)),
                     null),
@@ -202,8 +202,8 @@ namespace Azure.ResourceManager.Storage.Tests
         public async Task ListStorageTaskAssignments()
         {
             //create TaskAssignement
-            string taskAssignementName1 = Recording.GenerateAssetName("taskAssignement1");
-            string taskAssignementName2 = Recording.GenerateAssetName("taskAssignement2");
+            string taskAssignementName1 = Recording.GenerateAssetName("taskassignement1");
+            string taskAssignementName2 = Recording.GenerateAssetName("taskassignement2");
             StorageTaskAssignmentProperties assignmentProperties = new StorageTaskAssignmentProperties(
                 _storageTaskId,
                 false,
@@ -214,8 +214,11 @@ namespace Azure.ResourceManager.Storage.Tests
                         new string[] { },
                         null),
                     new ExecutionTrigger(
-                        ExecutionTriggerType.RunOnce,
-                        new ExecutionTriggerParameters()),
+                        ExecutionTriggerType.RunOnce, new ExecutionTriggerParameters(
+                            null, null, null, null,
+                            startOn: new DateTimeOffset(2025, 7, 1, 1, 1, 1, new TimeSpan()), // Record: the time should be in future
+                            null
+                         )),
                     null),
                 report: new StorageTaskAssignmentReport("container1"));
             var taskAssignment1 = (await _storageTaskAssignmentCollection.CreateOrUpdateAsync(
@@ -245,7 +248,7 @@ namespace Azure.ResourceManager.Storage.Tests
         public async Task ListStorageTaskAssignmentInstancesReport()
         {
             //create TaskAssignement
-            string taskAssignementName = Recording.GenerateAssetName("taskAssignement");
+            string taskAssignementName = Recording.GenerateAssetName("taskassignement");
             StorageTaskAssignmentProperties assignmentProperties = new StorageTaskAssignmentProperties(
                 _storageTaskId,
                 false,
@@ -257,16 +260,21 @@ namespace Azure.ResourceManager.Storage.Tests
                         null),
                     new ExecutionTrigger(
                         ExecutionTriggerType.RunOnce,
-                        new ExecutionTriggerParameters()),
+                        new ExecutionTriggerParameters(
+                            null,null,null,null,
+                            startOn: new DateTimeOffset(2025, 7, 1, 1, 1, 1, new TimeSpan()), // Record: the time should be in future
+                            null
+                         ),
+                        null),
                     null),
-                report: new StorageTaskAssignmentReport("container1"));
+                    report: new StorageTaskAssignmentReport("container1"));
             var taskAssignment = (await _storageTaskAssignmentCollection.CreateOrUpdateAsync(
                 WaitUntil.Completed,
                 taskAssignementName,
                 new StorageTaskAssignmentData(assignmentProperties))).Value;
 
             // list TaskAssignmentInstancesReport
-            var reports = await taskAssignment.GetStorageTaskAssignmentInstancesReportsAsync(maxpagesize: 3, filter: "startswith(name, report)").ToEnumerableAsync();
+            var reports = await taskAssignment.GetStorageTaskAssignmentInstancesReportsAsync(maxpagesize: 3, filter: "name=report").ToEnumerableAsync();
             Assert.AreEqual(0, reports.Count);
         }
     }
